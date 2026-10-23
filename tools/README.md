@@ -92,3 +92,56 @@ Exit codes are:
 ## Access needed
 
 Use an account with read permissions for MTV/Forklift resources, CRDs, CSVs, deployments, services, NetworkAttachmentDefinitions, StorageClasses, and cluster version information. The report will show warnings or failed checks for resources the account cannot inspect.
+
+## Storage and cluster diagnostics
+
+The following scripts were added for storage snapshot review and broader OpenShift Virtualization/MTV diagnostics. They use the currently selected `oc` context; check it with `oc config current-context` before running them. Reports and candidate lists can expose cluster topology, resource names, and configuration, so protect the generated files.
+
+| Script | Purpose | Behavior |
+| --- | --- | --- |
+| `snapshot_analisys.sh` | Reviews VolumeSnapshots in one namespace for failed snapshots, missing PVCs, PVCs not attached to VMs, and older duplicates. | Read-only; writes a report and a candidate list at `DELETE_LIST`. |
+| `snapshot_analisys_2.sh` | Collects an extended cluster health report for OpenShift, OpenShift Virtualization (CNV), MTV, and storage, plus a targeted namespace PVC summary. | Read-only; writes `REPORT`. |
+| `snapshot_analisys_3.sh` | Audits snapshot, VolumeSnapshotContent, PVC, PV, and capacity relationships for one namespace. | Read-only; writes a detailed report and separate candidate lists for snapshots, snapshot contents, PVCs, and PVs. Review every candidate manually; it does not delete resources. |
+| `cleaner.sh` | Deletes VolumeSnapshots named in a reviewed list. | **Destructive.** Requires a namespace other than `CHANGEME` and typed confirmation of that namespace. It does not delete PVCs or PVs. |
+
+### Configure and run
+
+Set `NAMESPACE` to the workload namespace. The scripts also accept environment overrides for report and candidate-list paths. The MTV namespace in the extended report is separately configurable as `MTV_NAMESPACE`.
+
+```bash
+oc config current-context
+NAMESPACE=your-workload-namespace bash tools/snapshot_analisys.sh
+```
+
+Run the broader health report and specify the MTV namespace if it differs from `openshift-mtv`:
+
+```bash
+NAMESPACE=your-workload-namespace \
+MTV_NAMESPACE=your-mtv-namespace \
+REPORT=./cluster-health-report.txt \
+bash tools/snapshot_analisys_2.sh
+```
+
+Run the detailed storage audit with custom output paths:
+
+```bash
+NAMESPACE=your-workload-namespace \
+FULL_REPORT=./storage-audit.txt \
+DELETE_LIST_VS=./snapshots-to-review.txt \
+DELETE_LIST_VSC=./snapshot-contents-to-review.txt \
+DELETE_LIST_PVC=./pvcs-to-review.txt \
+DELETE_LIST_PV=./pvs-to-review.txt \
+bash tools/snapshot_analisys_3.sh
+```
+
+### Snapshot cleanup workflow
+
+The first and third analysis scripts can write a VolumeSnapshot candidate list. Review the list and report first, then run the cleaner with the same namespace and list path. The cleaner prints the active context and every snapshot name, then requires the exact namespace to be typed before it calls `oc delete`.
+
+```bash
+NAMESPACE=your-workload-namespace \
+DELETE_LIST=./snapshots-to-review.txt \
+bash tools/cleaner.sh
+```
+
+The cleaner only handles VolumeSnapshots. The other candidate lists produced by `snapshot_analisys_3.sh` are report artifacts; no script in this folder automatically deletes VolumeSnapshotContents, PVCs, or PVs. Validate ownership, retention policy, backup coverage, and application impact before any cleanup.
