@@ -8,7 +8,7 @@ Both scripts use the active `oc` login and kubeconfig. No cluster resources are 
 
 | Script | Use it when | Requirements |
 | --- | --- | --- |
-| `mtv_cluster_audit.py` | You want the Python implementation, with per-cluster reports and machine-readable audit summaries. | Python 3.9+ (standard library only) and `oc`. |
+| `mtv_cluster_audit.py` | You want the Python implementation, with per-cluster reports and machine-readable audit summaries. | Python 3.10+ (standard library only) and `oc`. |
 | `mtv_cluster_audit.sh` | You want a Bash implementation suitable for RHEL 9 administration hosts. | Bash, `oc`, `jq`, and standard Unix utilities. |
 
 The reports cover:
