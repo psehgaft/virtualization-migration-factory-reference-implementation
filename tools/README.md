@@ -55,8 +55,7 @@ python3 tools/mtv_cluster_audit.py \
 Run the Bash implementation on RHEL 9:
 
 ```bash
-chmod +x tools/mtv_cluster_audit.sh
-tools/mtv_cluster_audit.sh --context CHANGEME-CLUSTER-CONTEXT
+bash tools/mtv_cluster_audit.sh --context CHANGEME-CLUSTER-CONTEXT
 ```
 
 Audit all contexts in the current kubeconfig:
@@ -64,14 +63,14 @@ Audit all contexts in the current kubeconfig:
 ```bash
 python3 tools/mtv_cluster_audit.py --all-contexts
 # or
-tools/mtv_cluster_audit.sh --all-contexts
+bash tools/mtv_cluster_audit.sh --all-contexts
 ```
 
 Skip live vCenter inventory lookups when you only want to validate objects and destination resources:
 
 ```bash
 python3 tools/mtv_cluster_audit.py --no-vcenter-inventory
-tools/mtv_cluster_audit.sh --no-vcenter-inventory
+bash tools/mtv_cluster_audit.sh --no-vcenter-inventory
 ```
 
 Use `--help` for the full options. Both scripts also support `--timeout SECONDS` and `--output-dir DIRECTORY`.
